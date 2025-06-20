@@ -3,6 +3,7 @@ import { loadSettings, getSettings, updateSettings } from './settings.js'
 
 let mainWindow: BrowserWindow | null = null
 let isQuitting = false
+let ipcHandlersSetup = false
 
 export function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -33,6 +34,8 @@ export function createWindow(): void {
 
   mainWindow.on('closed', () => {
     mainWindow = null
+    // Clean up IPC handlers
+    cleanupIpcHandlers()
   })
 
   mainWindow?.webContents.on('before-input-event', (event, input) => {
@@ -41,8 +44,11 @@ export function createWindow(): void {
     }
   })
 
-  // Setup IPC handlers
-  setupIpcHandlers()
+  // Setup IPC handlers only once
+  if (!ipcHandlersSetup) {
+    setupIpcHandlers()
+    ipcHandlersSetup = true
+  }
 }
 
 function setupIpcHandlers(): void {
@@ -67,6 +73,15 @@ function setupIpcHandlers(): void {
   ipcMain.handle('update-setting', (event, updates) => {
     return updateSettings(updates)
   })
+}
+
+function cleanupIpcHandlers(): void {
+  ipcMain.removeAllListeners('navigate-to-settings')
+  ipcMain.removeAllListeners('navigate-to-main')
+  ipcMain.removeAllListeners('hide-window')
+  ipcMain.removeHandler('get-settings')
+  ipcMain.removeHandler('update-setting')
+  ipcHandlersSetup = false
 }
 
 export function getMainWindow(): BrowserWindow | null {
