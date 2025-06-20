@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+    />
+    <link href="./settings.css" rel="stylesheet" />
+    <title>TypeTap Settings</title>
+  </head>
+  <body>
+    <main>
+      <div class="settings-container">
+        <div class="header">
+          <h2>Settings</h2>
+          <button id="backButton" class="back-button">← Back</button>
+        </div>
+        
+        <form class="settings-form">
+          <div class="setting-group">
+            <label class="setting-label">Overlay Mode</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" name="overlayMode" value="grid" id="gridMode" />
+                <span class="radio-text">Grid Mode</span>
+                <small class="setting-description">Divide screen into square regions with labels</small>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="overlayMode" value="label" id="labelMode" />
+                <span class="radio-text">Label Mode</span>
+                <small class="setting-description">Detect interactive elements using OCR or accessibility APIs</small>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-label">
+              <input type="checkbox" id="useAnimations" />
+              <span class="checkbox-text">Use Animations</span>
+            </label>
+            <small class="setting-description">Enable smooth mouse movement animations</small>
+          </div>
+        </form>
+      </div>
+    </main>
+    <script src="./settings.js"></script>
+  </body>
+</html>

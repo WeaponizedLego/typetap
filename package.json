@@ -6,8 +6,8 @@
   "main": "src/main.ts",
   "scripts": {
     "start": "electron .",
-    "build": "tsc && cp -r src/assets dist/",
-    "dev": "tsc && cp -r src/assets dist/ && electron dist/main.js"
+    "build": "tsc && rsync -av --exclude='*.ts' src/assets/ dist/assets/",
+    "dev": "tsc && rsync -av --exclude='*.ts' src/assets/ dist/assets/ && electron dist/main.js"
   },
   "author": "WeaponizedLego",
   "license": "GPL-3.0",
