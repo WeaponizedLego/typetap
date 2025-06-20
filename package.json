@@ -12,6 +12,7 @@
   "author": "WeaponizedLego",
   "license": "GPL-3.0",
   "devDependencies": {
+    "@types/node": "^24.0.3",
     "electron": "^36.5.0",
     "typescript": "^5.8.3"
   }
