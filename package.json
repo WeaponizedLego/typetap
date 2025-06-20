@@ -1,0 +1,18 @@
+{
+  "name": "typetap",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "## 🎯 Core Purpose",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "electron .",
+    "build": "tsc && cp -r src/assets dist/",
+    "dev": "tsc && cp -r src/assets dist/ && electron dist/main.js"
+  },
+  "author": "WeaponizedLego",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "electron": "^36.5.0",
+    "typescript": "^5.8.3"
+  }
+}
