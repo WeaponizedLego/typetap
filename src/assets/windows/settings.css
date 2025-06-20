@@ -1,0 +1,140 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: rgba(52, 52, 52, 0);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #333;
+}
+
+main {
+  background-color: rgb(240, 240, 240);
+  margin: 0 auto;
+  border-radius: 8px;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  app-region: drag;
+  user-select: none;
+}
+
+.settings-container {
+  width: 100%;
+  max-width: 500px;
+  padding: 20px;
+  app-region: no-drag;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 15px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.back-button {
+  background: #007acc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background: #005a9e;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.setting-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-left: 10px;
+}
+
+.radio-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.radio-option:hover {
+  border-color: #007acc;
+  background-color: #f8f9fa;
+}
+
+.radio-option input[type="radio"] {
+  margin: 0;
+  margin-right: 8px;
+}
+
+.radio-text {
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-text {
+  font-weight: 500;
+  color: #333;
+}
+
+.setting-description {
+  color: #666;
+  font-size: 12px;
+  margin-left: 20px;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #007acc;
+  cursor: pointer;
+}
+
+/* Allow interactive elements to receive clicks */
+input,
+button,
+select,
+textarea,
+label {
+  app-region: no-drag;
+}
