@@ -1,0 +1,15 @@
+# Dependencies
+node_modules
+
+# Build folders
+.dist
+dist
+.cache
+
+# OS Specific
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+**/*.log.*
