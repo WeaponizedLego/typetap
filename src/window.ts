@@ -8,7 +8,8 @@ export function createWindow(): void {
     width: 600,
     height: 150,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      contextIsolation: false
     },
     frame: false,
     transparent: false,
