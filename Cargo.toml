@@ -1,0 +1,21 @@
+[package]
+name = "typetap"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+accessibility = "0.2.0"
+accessibility-sys = "0.2.0"
+cocoa = "0.26.1"
+core-foundation = "0.10.1"
+core-graphics = "0.25.0"
+eframe = "0.35.0"
+enigo = "0.6.1"
+objc = "0.2.7"
+
+# The objc 0.2 macros trip a check-cfg lint we can't fix from here. Silence it
+# crate-wide so build output stays readable.
+[lints.rust]
+unexpected_cfgs = "allow"
