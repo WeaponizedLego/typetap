@@ -19,6 +19,8 @@ use cocoa::base::{id, nil};
 use core_foundation::base::{CFType, TCFType};
 use core_foundation::string::CFString;
 use core_graphics::display::CGDisplay;
+use core_graphics::event::CGEvent;
+use core_graphics::event_source::{CGEventSource, CGEventSourceStateID};
 use core_graphics::geometry::{CGPoint, CGSize};
 use objc::{class, msg_send, sel, sel_impl};
 
@@ -118,24 +120,35 @@ impl TreeVisitor for Collector {
     fn exit_element(&self, _el: &AXUIElement) {}
 }
 
-/// Bounding rectangle covering all displays, as (origin, size) in screen
-/// points. The overlay window is sized to this so hints on any monitor land in
-/// the right place (secondary monitors can sit at negative coordinates).
-pub fn screen_bounds() -> ((f64, f64), (f64, f64)) {
-    let ids = CGDisplay::active_displays().unwrap_or_default();
-    if ids.is_empty() {
-        let b = CGDisplay::main().bounds();
-        return ((b.origin.x, b.origin.y), (b.size.width, b.size.height));
-    }
-    let (mut min_x, mut min_y, mut max_x, mut max_y) = (f64::MAX, f64::MAX, f64::MIN, f64::MIN);
-    for id in ids {
+/// Bounds `(origin, size)` in screen points of the display containing `point`,
+/// or the main display if none do.
+///
+/// The overlay is sized to one display, never the union of all of them: the GPU
+/// caps a surface at 8192px per side, and a multi-monitor union on a retina
+/// screen (points × 2) blows past that and aborts. A single display always fits.
+pub fn display_containing(point: (f64, f64)) -> ((f64, f64), (f64, f64)) {
+    for id in CGDisplay::active_displays().unwrap_or_default() {
         let b = CGDisplay::new(id).bounds();
-        min_x = min_x.min(b.origin.x);
-        min_y = min_y.min(b.origin.y);
-        max_x = max_x.max(b.origin.x + b.size.width);
-        max_y = max_y.max(b.origin.y + b.size.height);
+        let (x, y) = point;
+        if x >= b.origin.x
+            && x < b.origin.x + b.size.width
+            && y >= b.origin.y
+            && y < b.origin.y + b.size.height
+        {
+            return ((b.origin.x, b.origin.y), (b.size.width, b.size.height));
+        }
     }
-    ((min_x, min_y), (max_x - min_x, max_y - min_y))
+    let b = CGDisplay::main().bounds();
+    ((b.origin.x, b.origin.y), (b.size.width, b.size.height))
+}
+
+/// Current mouse-cursor position in screen points (top-left origin), matching
+/// the AX / click coordinate space. Used to pick which display to cover.
+pub fn cursor_point() -> Option<(f64, f64)> {
+    let source = CGEventSource::new(CGEventSourceStateID::HIDSystemState).ok()?;
+    let event = CGEvent::new(source).ok()?;
+    let p = event.location();
+    Some((p.x, p.y))
 }
 
 /// PID of the app the user is currently looking at, via AppKit's NSWorkspace.

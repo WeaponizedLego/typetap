@@ -44,23 +44,66 @@ fn assign_with(priorities: &[i32], alphabet: &[char]) -> Vec<String> {
 
 /// The `n` easiest prefix-free labels, easiest first.
 ///
-/// Start with single chars; when we need more, expand the *hardest* current
-/// label into its children (label + each key). Removing the parent keeps the
-/// set prefix-free, and demoting the hardest label means easy single keys stay
-/// reserved for top-priority elements.
+/// A *balanced* code: pick the shortest length that fits `n`, then keep as many
+/// labels as possible one char shorter — so the easiest keys are also the
+/// shortest, and no label runs away long. With 26 keys every screen up to 676
+/// elements gets labels of at most two chars, and lengths differ by at most one.
 ///
-/// ponytail: greedy "expand the worst" — good, not provably optimal ergonomics.
-/// Swap in a weighted/Huffman scheme only if real hint usage proves it matters.
+/// (The earlier version expanded the *hardest* label repeatedly, which piled all
+/// the length onto the tail: past ~76 elements the worst hints ballooned to
+/// `zzza`-style 4-char monsters that overlapped and were miserable to type.)
 fn easiest_labels(n: usize, alphabet: &[char]) -> Vec<String> {
-    let mut labels: Vec<String> = alphabet.iter().map(|c| c.to_string()).collect();
-    while labels.len() < n {
-        let parent = labels.pop().expect("alphabet non-empty");
-        for c in alphabet {
-            labels.push(format!("{parent}{c}"));
+    if n == 0 {
+        return Vec::new();
+    }
+    let k = alphabet.len();
+
+    // No more targets than keys: one char each, easiest first.
+    if n <= k {
+        return (0..n).map(|i| alphabet[i].to_string()).collect();
+    }
+
+    // `len` = shortest label length that can hold n labels (k^len >= n).
+    let mut len = 1usize;
+    let mut cap = k;
+    while cap < n {
+        cap = cap.saturating_mul(k);
+        len += 1;
+    }
+
+    // There are `parents` = k^(len-1) prefixes of length len-1. Keeping one as a
+    // leaf costs one label; expanding it into its k children yields k. Expand
+    // only the hardest few needed to reach n, so the easy prefixes stay short.
+    let parents = k.pow((len - 1) as u32);
+    let expand = (n - parents).div_ceil(k - 1); // prefixes to fan out
+    let short = parents - expand; // prefixes kept as length-(len-1) leaves
+
+    let mut labels = Vec::with_capacity(n);
+    for i in 0..short {
+        labels.push(seq(i, len - 1, alphabet));
+    }
+    for i in short..parents {
+        let prefix = seq(i, len - 1, alphabet);
+        for &c in alphabet {
+            labels.push(format!("{prefix}{c}"));
         }
     }
     labels.truncate(n);
     labels
+}
+
+/// The `i`-th length-`m` sequence over `alphabet`, in odometer order (base-`k`
+/// counting, most-significant char first). `seq(0, 2)` is "ff", `seq(1, 2)` is
+/// "fj", etc. — so lower indices are the easier-to-type combinations.
+fn seq(i: usize, m: usize, alphabet: &[char]) -> String {
+    let k = alphabet.len();
+    let mut idx = i;
+    let mut chars = vec![alphabet[0]; m];
+    for pos in (0..m).rev() {
+        chars[pos] = alphabet[idx % k];
+        idx /= k;
+    }
+    chars.into_iter().collect()
 }
 
 #[cfg(test)]
@@ -108,6 +151,32 @@ mod tests {
         assert_eq!(uniq.len(), n, "labels must be unique");
         // Top-priority element still gets a one-key hint.
         assert_eq!(labels[0].len(), 1);
+    }
+
+    #[test]
+    fn large_set_stays_short_and_balanced() {
+        // A busy window can have hundreds of elements; hints must not balloon.
+        let n = 300;
+        let labels = assign(&vec![0; n]);
+        assert_eq!(labels.len(), n);
+        assert!(is_prefix_free(&labels), "labels must be prefix-free");
+        let uniq: std::collections::HashSet<_> = labels.iter().collect();
+        assert_eq!(uniq.len(), n, "labels must be unique");
+
+        let max = labels.iter().map(|l| l.len()).max().unwrap();
+        let min = labels.iter().map(|l| l.len()).min().unwrap();
+        assert_eq!(max, 2, "300 elements must fit in two keys, not more");
+        assert!(max - min <= 1, "hint lengths must differ by at most one");
+        // The highest-priority element still gets the single easiest key.
+        assert_eq!(labels[0], "f");
+    }
+
+    #[test]
+    fn full_two_char_space_is_uniform() {
+        // Exactly k^2 elements: every label is a distinct two-key combo.
+        let labels = assign(&vec![0; 26 * 26]);
+        assert!(labels.iter().all(|l| l.len() == 2));
+        assert!(is_prefix_free(&labels));
     }
 
     #[test]

@@ -17,12 +17,15 @@ OS-independent).
 | Find clickable elements on screen (macOS Accessibility) | ✅ working |
 | Perform the click / right-click / move | ✅ working |
 | On-screen hint overlay | ✅ working |
-| Global hotkey to trigger it | 🚧 next |
+| Grid mode (click anywhere) | ✅ working |
+| Global hotkey to trigger it | ✅ working |
 | Windows support | ⏳ later |
 
-So right now `cargo run` pops a see-through **overlay** with a hint chip on
-every clickable element. Type a hint and it clicks. A global hotkey (so you
-trigger it from any app without a terminal) is next.
+`cargo run` now launches typetap as a **background daemon**. Leave it running
+and press **⇧⌘Space** (Shift+Cmd+Space) from *any* app — a see-through overlay
+drops a hint chip on every clickable element. Type a hint and it clicks, then
+the overlay hides again, ready for the next press. (On Windows the hotkey is
+Shift+Alt+Space.)
 
 ---
 
@@ -77,10 +80,9 @@ then run again.
 ```
 
 Open **System Settings → Privacy & Security → Accessibility**, switch on your
-terminal app (Terminal, iTerm, etc.), then run `cargo run` again. Now it lists
-the clickable things in whatever window was frontmost:
-
-A translucent overlay covers the screen with a yellow hint chip on each
+terminal app (Terminal, iTerm, etc.), then run `cargo run` again. It stays
+running and prints `typetap ready`. Switch to any app, press **⇧⌘Space**, and a
+translucent overlay covers that app's display with a yellow hint chip on each
 clickable element. The highest "click-intent" elements (buttons, links) get the
 easiest single keys; plain text gets harder or two-key hints.
 
@@ -92,9 +94,23 @@ easiest single keys; plain text gets harder or two-key hints.
 
 As you type, chips that can't match disappear, so you always see what's left.
 
-> ⚠️ It really moves your mouse and clicks. Run from a terminal, the scanned
-> "frontmost window" is the terminal itself. Bound to a hotkey later, it'll
-> target whatever app you were actually using.
+### Grid mode — click *anywhere*
+
+Some apps (games, canvas/Electron apps, remote desktops, or a plain terminal)
+expose no clickable elements for the overlay to label. Grid mode covers the
+whole screen with a labeled grid instead, so you can aim a click at any point:
+
+```sh
+cargo run -- grid
+```
+
+Now ⇧⌘Space covers the display under your cursor with a labeled grid. Every cell
+has a two-key hint — the first key picks the row, the second the column, both in
+the same home-row-first order. Type the two keys to click that cell's center
+(Shift = right-click, ⌥ = move only, Esc = cancel, same as above).
+
+> ⚠️ It really moves your mouse and clicks — on whatever app was frontmost when
+> you pressed the hotkey.
 
 ---
 
@@ -124,20 +140,16 @@ logic will drive the future Windows version unchanged.
 
 ---
 
-## When the full app exists (preview of how it'll work)
+## Still rough / next up
 
-> Not built yet — here so you know where this is going.
-
-1. Press a global hotkey from anywhere.
-2. typetap labels every clickable thing in the front window with a hint.
-3. Type the hint → it clicks.
-   - plain hint = left click
-   - a modifier + hint = right click
-   - a modifier + hint = just move the pointer there (no click)
-4. **macOS will require granting Accessibility permission** the first time:
-   System Settings → Privacy & Security → Accessibility → enable typetap.
-   (Nothing can read or click other apps' windows without this — it's a macOS
-   rule, not optional.)
+- **Runs from a terminal, not as a bundled app.** So the Accessibility
+  permission you grant is your *terminal's*. A proper `.app` bundle (and a
+  menu-bar icon instead of a live terminal) comes later.
+- **Element mode vs grid mode is chosen at launch** (`cargo run` vs
+  `cargo run -- grid`), not switchable at runtime yet — a second hotkey to flip
+  between them would be the natural next step.
+- **Windows support** is stubbed: the hint logic, grid, and clicker are already
+  OS-independent; only `macos.rs` (element scanning) needs a Windows sibling.
 
 ---
 
